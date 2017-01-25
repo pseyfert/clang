@@ -737,7 +737,7 @@ bool getPredefinedStyle(StringRef Name, FormatStyle::LanguageKind Language,
     *Style = getWebKitStyle();
   } else if (Name.equals_lower("gnu")) {
     *Style = getGNUStyle();
-  } else if (Name.equals_lower("none")) {
+  } else if (Name.equals_lower("none") || Name.equals_lower("fail")) {
     *Style = getNoStyle();
   } else {
     return false;
@@ -1977,7 +1977,12 @@ llvm::Expected<FormatStyle> getStyle(StringRef StyleName, StringRef FileName,
     return make_string_error("Configuration file(s) do(es) not support " +
                              getLanguageName(Style.Language) + ": " +
                              UnsuitableConfigFiles);
-  return FallbackStyle;
+
+  if (!FallbackStyleName.equals_lower("fail")) {
+    return FallbackStyle;
+  } else {
+    return make_string_error("Configuration file not found.");
+  }
 }
 
 } // namespace format
